@@ -20,11 +20,6 @@ export default async function Home() {
             <Header />
             <main className="flex-1 w-full h-full bg-dumplingprimary">
                 <AppContent />
-                {
-                    userItems.map((item, index) => (
-                        <div key={`${item.name}-list-item-${index}`}>{item.name}</div>
-                    ))
-                }
             </main>
         </div>
     );
