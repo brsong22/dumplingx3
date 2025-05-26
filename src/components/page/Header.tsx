@@ -3,8 +3,8 @@ import { AuthButton } from "../auth/AuthButton";
 
 export function Header() {
     return (
-        <div className="sticky top-0 z-1000 flex items-center w-full h-10 bg-white text-black p-4">
-            <Link href="/">Dumplingx3!</Link>
+        <div className="flex items-center w-full h-10 bg-white text-black px-4">
+            <Link href="">Dumplingx3!</Link>
             <AuthButton />
         </div>
     );

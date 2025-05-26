@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { ScannerToggleButton } from "../ScannerToggleButton";
+import { ScannerToggleButton } from "../BarcodeScannerToggle";
 
 describe("ScannerToggleButton", () => {
     it("renders button with icon and text", () => {

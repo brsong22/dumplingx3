@@ -15,8 +15,8 @@ export async function GET(req: NextRequest) {
 
     const item: OpenFoodFactsBarcodeResult | null = barcodeResult.status === 1 ? {
         code: barcodeResult.code,
-        name: barcodeResult.product_name_en,
-        image: barcodeResult.image_front_url
+        name: barcodeResult.product.product_name_en,
+        image: barcodeResult.product.image_front_url
     } : null;
 
     return NextResponse.json({ item: item });

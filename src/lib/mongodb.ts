@@ -1,27 +1,38 @@
-import { MongoClient } from "mongodb";
+import { Db, MongoClient } from "mongodb";
 
 const uri = process.env.MONGO_CONNECTION!;
-const options = {};
+const dbName = process.env.MONGO_DB!;
 
-let client;
-let clientPromise: Promise<MongoClient>;
-
-if (!process.env.MONGO_CONNECTION) {
-    throw new Error("Please add MONGO_CONNECTION to your environment variables");
+declare global {
+    // eslint-disable-next-line no-var
+    var _mongoClient: Promise<MongoClient> | undefined;
 }
 
-if (process.env.NODE_ENV === "development") {
-    // eslint-disable-next-line
-    if (!(global as any)._mongoClientPromise) {
-        client = new MongoClient(uri, options);
-        // eslint-disable-next-line
-        (global as any)._mongoClientPromise = client.connect();
+let client: Promise<MongoClient> | null = null;
+let db: Db | null = null;
+
+if (!uri) throw new Error("No MongoDB connection string defined");
+if (!dbName) throw new Error("No MongoDB DB defined");
+
+export async function getMongoClient(): Promise<MongoClient> {
+    if (client) return client;
+
+    if (process.env.NODE_ENV === "development") {
+        if (!global._mongoClient) {
+            global._mongoClient = new MongoClient(uri).connect();
+        }
+        client = global._mongoClient;
+    } else {
+        client = new MongoClient(uri).connect();
     }
-    // eslint-disable-next-line
-    clientPromise = (global as any)._mongoClientPromise;
-} else {
-    client = new MongoClient(uri, options);
-    clientPromise = client.connect();
+
+    return client;
 }
 
-export default clientPromise;
+export async function getMongoDb(): Promise<Db> {
+    if (db) return db;
+
+    const client = await getMongoClient();
+    db = client.db(dbName);
+    return db;
+}

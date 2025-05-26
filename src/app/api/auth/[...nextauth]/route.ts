@@ -1,12 +1,12 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
-import clientPromise from "@/lib/mongodb";
+import { getMongoClient, getMongoDb } from "@/lib/mongodb";
 import { compare } from "bcrypt";
 import { User } from "@/types/user";
 
 export const authOptions: AuthOptions = {
-    adapter: MongoDBAdapter(clientPromise),
+    adapter: MongoDBAdapter(getMongoClient()),
     session: {
         strategy: "jwt",
     },
@@ -19,9 +19,7 @@ export const authOptions: AuthOptions = {
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) return null;
-
-                const client = await clientPromise;
-                const db = client.db(process.env.MONGO_DB);
+                const db = await getMongoDb();
 
                 const user: User | null = await db.collection<User>("users").findOne({ email: credentials.email });
                 if (!user || !user.password) return null;

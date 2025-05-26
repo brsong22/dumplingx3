@@ -1,6 +1,6 @@
 import { BarcodeScanner } from "./BarcodeScanner";
 import { BarcodeScannerResult } from "./BarcodeScannerResult";
-import { ScannerToggleButton } from "./ScannerToggleButton";
+import { ScannerToggleButton } from "./BarcodeScannerToggle";
 import { useLookupUpc } from "./useLookupUpc";
 
 export {

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Header } from "@/components/page/Header";
 import { SessionProviderWrapper } from "@/components/SessionProviderWrapper";
 import { config } from "@fortawesome/fontawesome-svg-core";
 
@@ -18,9 +17,8 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className="antialiased bg-dumplingprimary text-black">
+            <body className="antialiase">
                 <SessionProviderWrapper>
-                    <Header />
                     {children}
                 </SessionProviderWrapper>
             </body>
