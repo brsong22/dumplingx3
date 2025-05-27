@@ -22,7 +22,6 @@ export function ItemForm({
         image: ""
     });
     const [price, setPrice] = useState<string>("0.00");
-    const [isSuccess, setSuccess] = useState<boolean>(false);
     const [isFail, setFail] = useState<boolean>(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +32,6 @@ export function ItemForm({
         e.preventDefault();
         formData.price = price;
         formData.image = item?.image ?? "";
-        console.log(formData);
 
         const res = await fetch("/api/items", {
             method: "POST",
@@ -44,25 +42,11 @@ export function ItemForm({
         const result = await res.json();
 
         if (result.success) {
-            setSuccess(true);
             onCancel();
         } else {
             setFail(true);
         }
     };
-
-    // const handleCancel = () => {
-    //     console.log("here");
-    //     setFormData({
-    //         upc: "",
-    //         name: "",
-    //         price: "0.00",
-    //         date: getLocalISODateTime(new Date()).split("T")[0],
-    //         location: "",
-    //         image: ""
-    //     });
-    //     onCancel();
-    // };
 
     const handleCurrencyInput = (e: React.ChangeEvent<HTMLInputElement>, setValue: (v: string) => void) => {
         const digitsOnly = e.target.value.replace(/\D/g, "");
@@ -86,32 +70,29 @@ export function ItemForm({
             <form onSubmit={handleSubmit} className="flex flex-col gap-y-1">
                 <div className="flex items-center">
                     <label htmlFor="upc" className="flex-[1]">UPC:</label>
-                    <input name="upc" value={formData.upc} onChange={handleChange} placeholder="01234567891011" className="flex-[2] border rounded-md px-2 py-1" />
+                    <input id="upc" name="upc" value={formData.upc} onChange={handleChange} placeholder="01234567891011" className="flex-[2] border rounded-md px-2 py-1" />
                 </div>
                 <div className="flex items-center">
                     <label htmlFor="name" className="flex-[1]">Item Name:</label>
-                    <input name="name" value={formData.name} onChange={handleChange} placeholder="Tasty Dumps" className="flex-[2] border rounded-md px-2 py-1" />
+                    <input id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Tasty Dumps" className="flex-[2] border rounded-md px-2 py-1" />
                 </div>
                 <div className="flex items-center">
                     <label htmlFor="price" className="flex-[1]">Price:</label>
-                    <input name="price" value={price} onChange={(e) => handleCurrencyInput(e, setPrice)} placeholder="0.00" className="flex-[2] border rounded-md px-2 py-1" />
+                    <input id="price" name="price" value={price} onChange={(e) => handleCurrencyInput(e, setPrice)} placeholder="0.00" className="flex-[2] border rounded-md px-2 py-1" />
                 </div>
                 <div className="flex items-center">
                     <label htmlFor="date" className="flex-[1]">Purchase Date:</label>
-                    <input name="date" type="date" value={formData.date} onChange={handleChange} className="flex-[2] border rounded-md px-2 py-1" />
+                    <input id="date" name="date" type="date" value={formData.date} onChange={handleChange} className="flex-[2] border rounded-md px-2 py-1" />
                 </div>
                 <div className="flex items-center">
                     <label htmlFor="location" className="flex-[1]">Store:</label>
-                    <input name="location" value={formData.location} onChange={handleChange} placeholder="the Dumps store" className="flex-[2] border rounded-md px-2 py-1" />
+                    <input id="location" name="location" value={formData.location} onChange={handleChange} placeholder="the Dumps store" className="flex-[2] border rounded-md px-2 py-1" />
                 </div>
                 <div className="w-full items-center mt-2">
-                    <button onClick={onCancel} className="absolute left-4 bg-white rounded-md px-2 py-1">Cancel</button>
+                    <button type="button" onClick={onCancel} className="absolute left-4 bg-white rounded-md px-2 py-1">Cancel</button>
                     <button type="submit" className="absolute right-4 bg-green-500 rounded-md px-2 py-1">Submit</button>
                 </div>
             </form>
-            {
-                isSuccess && <p>Success!</p>
-            }
             {
                 isFail && <p>Error occured.</p>
             }

@@ -9,7 +9,7 @@ export function ItemFormToggle({
 }: Props) {
     return (
         <button onClick={onClick} className="w-4/5 px-4 py-2 bg-white rounded-md">
-            <FontAwesomeIcon icon={faClipboardList} /> Enter Data
+            <FontAwesomeIcon icon={faClipboardList} data-testid="itemFormClipboardIcon" /> Enter Data
         </button>
     );
 }

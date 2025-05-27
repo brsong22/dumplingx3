@@ -4,7 +4,7 @@ import { BarcodeScanner } from "../BarcodeScanner";
 jest.mock("react-qr-barcode-scanner", () => {
     return {
         __esModule: true,
-        // eslint-disable-next-line
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         default: (props: any) => (
             <div data-testid="mock-scanner">
                 <button onClick={() => props.onUpdate(null, { getText: () => "12345" })}>
@@ -16,15 +16,15 @@ jest.mock("react-qr-barcode-scanner", () => {
 });
 
 describe("BarcodeScanner", () => {
-    it("renders cancel button", () => {
+    it("renders cancel icon", () => {
         render(<BarcodeScanner onDetected={() => { }} onCancel={() => { }} />);
-        expect(screen.getByRole("button", { name: /cancel/i })).toBeInTheDocument();
+        expect(screen.getByTestId("barcodeScannerCancelIcon")).toBeInTheDocument();
     });
 
     it("calls onCancel when cancel button clicked", () => {
         const onCancel = jest.fn();
         render(<BarcodeScanner onDetected={() => { }} onCancel={onCancel} />);
-        fireEvent.click(screen.getByRole("button", { name: /cancel/i }));
+        fireEvent.click(screen.getByTestId("barcodeScannerCancelIcon"));
         expect(onCancel).toHaveBeenCalledTimes(1);
     });
 

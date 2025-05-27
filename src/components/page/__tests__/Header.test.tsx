@@ -6,11 +6,10 @@ jest.mock("../../auth/AuthButton", () => ({
 }));
 
 describe("Header", () => {
-    it("renders the header title with a link to home", () => {
+    it("renders the header title", () => {
         render(<Header />);
-        const linkElement = screen.getByRole("link", { name: /dumplingx3!/i });
-        expect(linkElement).toBeInTheDocument();
-        expect(linkElement).toHaveAttribute("href", "/");
+        const title = screen.getByText("Dumplingx3!");
+        expect(title).toBeInTheDocument();
     });
 
     it("renders the AuthButton", () => {

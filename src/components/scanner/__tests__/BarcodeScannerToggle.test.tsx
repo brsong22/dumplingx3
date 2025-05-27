@@ -1,15 +1,16 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { ScannerToggleButton } from "../BarcodeScannerToggle";
+import { BarcodeScannerToggle } from "../BarcodeScannerToggle";
 
-describe("ScannerToggleButton", () => {
+describe("BarcodeScannerToggle", () => {
     it("renders button with icon and text", () => {
-        render(<ScannerToggleButton onClick={() => { }} />);
+        render(<BarcodeScannerToggle onClick={() => { }} />);
+        expect(screen.getByTestId("barcodeScannerToggleCameraIcon")).toBeInTheDocument();
         expect(screen.getByRole("button")).toHaveTextContent(/Scan Barcode/i);
     });
 
     it("calls onClick when button is clicked", () => {
         const onClick = jest.fn();
-        render(<ScannerToggleButton onClick={onClick} />);
+        render(<BarcodeScannerToggle onClick={onClick} />);
         fireEvent.click(screen.getByRole("button"));
         expect(onClick).toHaveBeenCalledTimes(1);
     });

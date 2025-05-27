@@ -20,7 +20,7 @@ export function BarcodeScanner({
 
     return (
         <>
-            <button onClick={onCancel}><FontAwesomeIcon icon={faXmark} /></button>
+            <button onClick={onCancel}><FontAwesomeIcon icon={faXmark} data-testid="barcodeScannerCancelIcon" /></button>
             {loading && <p>Loading...</p>}
             <BarcodeScannerComponent
                 width={400}

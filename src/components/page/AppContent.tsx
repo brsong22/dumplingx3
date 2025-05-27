@@ -39,6 +39,8 @@ export function AppContent({ }) {
         fetchItems();
     }, [isScanning, showForm]);
 
+    console.log(userItems);
+
     return (
         <div className="flex-1 p-4">
             {(!isScanning && !showForm) && (

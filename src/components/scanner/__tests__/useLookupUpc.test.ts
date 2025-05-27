@@ -7,12 +7,12 @@ global.fetch = jest.fn();
 
 describe("useLookupUpc", () => {
     beforeEach(() => {
-        jest.clearAllMocks();
+        jest.resetAllMocks();
     });
 
     it("should initialize with null result and not loading", () => {
         const { result } = renderHook(() => useLookupUpc());
-        expect(result.current.result).toBeNull();
+        expect(result.current.itemInfo).toBeNull();
         expect(result.current.loading).toBe(false);
     });
 
@@ -32,7 +32,7 @@ describe("useLookupUpc", () => {
             expect(result.current.loading).toBe(false);
         });
 
-        expect(result.current.result).toEqual(mockItem);
+        expect(result.current.itemInfo).toEqual(mockItem);
     });
 
     it("should set result to null on failed fetch", async () => {
@@ -50,6 +50,6 @@ describe("useLookupUpc", () => {
             expect(result.current.loading).toBe(false);
         });
 
-        expect(result.current.result).toBeNull();
+        expect(result.current.itemInfo).toBeNull();
     });
 });
