@@ -1,49 +1,38 @@
 import { Session } from "next-auth";
 import { NextResponse } from "next/server";
-import { getMongoDb, getNextId } from "@/lib/mongodb";
 import sessionAuth from "@/lib/sessionAuth";
-import { getItemsByUserEmail } from "@/lib/getItems";
+import { getUserByEmail, getItemsByUser, postNewItem } from "@/lib/prismaQueries";
+import { ItemForm } from "@/types/item";
 
 export const GET = sessionAuth(async (req: Request, session: Session) => {
     try {
-        const db = await getMongoDb();
-        const collection = db.collection("items");
-
         const email = session.user?.email ?? "";
-        const { searchParams } = new URL(req.url);
-        const upcs = searchParams.get("upc");
-        let items = [];
-        if (upcs) {
-            items = await collection.find({
-                $and: [
-                    { upc: { $in: upcs } },
-                    { email: email }
-                ]
-            }).toArray();
-        } else {
-            items = await getItemsByUserEmail(email);
-        }
-        return NextResponse.json({ success: true, data: items });
+        const user = await getUserByEmail(email);
 
+        if (!user) return NextResponse.redirect(new URL("/auth/signin", req.url));
+
+        const items = await getItemsByUser(user);
+
+        return NextResponse.json({ success: true, data: items });
     } catch (err) {
         const error = err as Error;
-        return NextResponse.json({ success: false, message: error.message });
+        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 });
 
 export const POST = sessionAuth(async (req: Request, session: Session) => {
     try {
-        const db = await getMongoDb();
-        const collection = db.collection("items");
+        const email = session.user?.email ?? "";
+        const user = await getUserByEmail(email);
 
-        const id = await getNextId(db, "itemId");
+        if (!user) return NextResponse.redirect(new URL("/auth/signin", req.url));
 
-        const { upc, name, price, date, location, image } = await req.json();
-        const res = await collection.insertOne({ id, upc, name, price, date, location, image, createdBy: session.user?.email });
+        const formData: ItemForm = await req.json();
+        const item = await postNewItem(formData, user);
 
-        return NextResponse.json({ success: true, insertedId: res.insertedId });
+        return NextResponse.json({ success: true, insertedId: item.id }, { status: 201 });
     } catch (err) {
         const error = err as Error;
-        return NextResponse.json({ success: false, message: error.message });
+        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 });

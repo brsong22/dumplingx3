@@ -4,17 +4,17 @@ import { ItemFormToggle } from "@/components/forms/ItemForm/ItemFormToggle";
 import { useEffect, useState } from "react";
 import { BarcodeScanner, useLookupUpc } from "../scanner";
 import { ItemForm } from "../forms/ItemForm/ItemForm";
-import { Dumplingx3Item } from "@/types/Dumplingx3Item";
+import { Item } from "@/types/item";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBasketShopping } from "@fortawesome/free-solid-svg-icons/faBasketShopping";
-import { faWallet } from "@fortawesome/free-solid-svg-icons/faWallet";
+// import { faWallet } from "@fortawesome/free-solid-svg-icons/faWallet";
 import { useRouter } from "next/navigation";
 
 export function AppContent({ }) {
     const router = useRouter();
     const [isScanning, setIsScanning] = useState<boolean>(false);
     const [showForm, setShowForm] = useState<boolean>(false);
-    const [userItems, setUserItems] = useState<Dumplingx3Item[]>([]);
+    const [userItems, setUserItems] = useState<Item[]>([]);
 
     const { itemInfo, searchUpc, resetItemInfo } = useLookupUpc();
 
@@ -62,7 +62,7 @@ export function AppContent({ }) {
                         {userItems.map((item) => (
                             <button type="button" key={`${item.id}${item.name}-list-item`} onClick={() => handleNavigateToItem(item.id)} className="flex items-center justify-between w-full h-15 px-4 py-2 bg-secondary border border-secondary rounded-md">
                                 <span><FontAwesomeIcon icon={faBasketShopping} />&nbsp;{item.name}</span>
-                                <span><FontAwesomeIcon icon={faWallet} className="ml-2" />&nbsp;{item.price}</span>
+                                {/* <span><FontAwesomeIcon icon={faWallet} className="ml-2" />&nbsp;{item.price}</span> */}
                             </button>
                         ))}
                     </div>

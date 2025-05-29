@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import bcrypt from "bcrypt";
-import { getMongoDb } from "@/lib/mongodb";
-import { User } from "@/types/user";
 
 export async function POST(request: Request) {
     const { email, password } = await request.json();
@@ -10,24 +10,20 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
     }
 
-    const db = await getMongoDb();
+    try {
+        const hashedPass = await bcrypt.hash(password, 10);
+        const user = await prisma.user.create({
+            data: { email, password: hashedPass },
+        });
 
-    // Check if user already exists
-    const existingUser: User | null = await db.collection<User>("users").findOne({ email });
-    if (existingUser) {
-        return NextResponse.json({ error: "User already exists" }, { status: 409 });
+        return NextResponse.json({ message: "User created.", user: user }, { status: 201 });
+    } catch (error) {
+        if (
+            error instanceof PrismaClientKnownRequestError &&
+            error.code === "P2002"
+        ) {
+            throw new Error("Email already in use.");
+        }
+        throw new Error("An error occurred please try again.");
     }
-
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create user
-    const result = await db.collection<User>("users").insertOne({
-        email,
-        password: hashedPassword,
-        createdAt: new Date(),
-        updatedAt: new Date()
-    });
-
-    return NextResponse.json({ message: "User created", userId: result.insertedId }, { status: 201 });
 }

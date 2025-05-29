@@ -1,12 +1,12 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { MongoDBAdapter } from "@next-auth/mongodb-adapter";
-import { getMongoClient, getMongoDb } from "@/lib/mongodb";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { compare } from "bcrypt";
 import { User } from "@/types/user";
+import { prisma } from "@/lib/prisma";
 
 export const authOptions: AuthOptions = {
-    adapter: MongoDBAdapter(getMongoClient()),
+    adapter: PrismaAdapter(prisma),
     session: {
         strategy: "jwt",
     },
@@ -19,15 +19,17 @@ export const authOptions: AuthOptions = {
             },
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) return null;
-                const db = await getMongoDb();
 
-                const user: User | null = await db.collection<User>("users").findOne({ email: credentials.email });
+                const user: User | null = await prisma.user.findUnique({
+                    where: { email: credentials.email },
+                });
+
                 if (!user || !user.password) return null;
 
                 const isValid = await compare(credentials.password, user.password);
                 if (!isValid) return null;
 
-                return { id: user._id?.toString() || "", email: user.email };
+                return { ...user, id: String(user.id) };
             },
         }),
     ],

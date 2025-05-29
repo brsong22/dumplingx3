@@ -1,8 +1,7 @@
 "use client";
 
 import { Header } from "@/components/page/Header";
-import { Dumplingx3Item } from "@/types/Dumplingx3Item";
-import Image from "next/image";
+import { Item } from "@/types/item";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -10,7 +9,7 @@ export default function ItemDetailPage() {
     const params = useParams();
     const itemId = params.id;
 
-    const [item, setItem] = useState<Dumplingx3Item>();
+    const [item, setItem] = useState<Item>();
 
     useEffect(() => {
         const fetchItemInfo = async () => {
@@ -28,12 +27,12 @@ export default function ItemDetailPage() {
         <div>
             <Header />
             <h2 className="font-bold text-2xl">{item?.name}</h2>
-            {
+            {/* {
                 item?.image &&
                 <Image src={item?.image} alt={`${item?.name}-product-image`} width="80" height="100" />
-            }
+            } */}
             <p>UPC:&nbsp;{item?.upc}</p>
-            <p>Price:&nbsp;{item?.price}</p>
+            {/* <p>Price:&nbsp;{item?.price}</p> */}
             <p>Store:&nbsp;{item?.location}</p>
         </div>
     );

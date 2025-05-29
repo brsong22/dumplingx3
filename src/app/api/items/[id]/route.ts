@@ -1,29 +1,27 @@
 import { Session } from "next-auth";
 import { NextResponse } from "next/server";
-import { getMongoDb } from "@/lib/mongodb";
 import sessionAuth from "@/lib/sessionAuth";
+import { getItemById, getUserByEmail } from "@/lib/prismaQueries";
+import { User } from "@/types/user";
+import { Item } from "@/types/item";
 
 export const GET = sessionAuth(async (req: Request, session: Session, params: { id: string }) => {
     try {
-        const id = (await params).id;
-
-        const db = await getMongoDb();
-        const collection = db.collection("items");
+        const itemId = (await params).id;
 
         const email = session.user?.email ?? "";
+        const user: User | null = await getUserByEmail(email);
 
-        console.log(id);
-        console.log(email);
+        if (!user) return NextResponse.redirect(new URL("/auth/signin", req.url));
 
-        const item = await collection.findOne({
-            id: parseInt(id, 10),
-            createdBy: email
-        });
+        const item: Item | null = await getItemById(user, parseInt(itemId, 10));
+
+        if (!item) return NextResponse.json({ success: false, message: "Item not found." }, { status: 404 });
 
         return NextResponse.json({ success: true, data: item });
 
     } catch (err) {
         const error = err as Error;
-        return NextResponse.json({ success: false, message: error.message });
+        return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 });
