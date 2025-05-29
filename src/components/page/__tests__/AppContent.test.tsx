@@ -3,6 +3,7 @@ import { AppContent } from "../AppContent";
 import * as useLookupHook from "@/components/scanner/useLookupUpc";
 import React from "react";
 import { mockItem } from "@/test-utils/mockItem";
+import { mockRouter } from "@/test-utils/mockRouter";
 
 // Mock child components
 jest.mock("@/components/scanner/BarcodeScannerToggle", () => ({
@@ -32,6 +33,9 @@ jest.mock("@/components/forms/ItemForm/ItemForm", () => ({
             <button onClick={onCancel}>Cancel Form</button>
         </div>
     ),
+}));
+jest.mock("next/navigation", () => ({
+    useRouter: () => mockRouter
 }));
 
 const mockSearchUpc = jest.fn();
