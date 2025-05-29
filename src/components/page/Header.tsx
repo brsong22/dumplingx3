@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { AuthButton } from "../auth/AuthButton";
 
 export function Header() {
     return (
-        <div className="flex items-center w-full h-10 bg-white text-black px-4">
-            <Link href="">Dumplingx3!</Link>
+        <div className="flex items-center justify-between w-full h-20 bg-accentdark text-primarytext px-4">
+            <div className="flex text-4xl">Dumplingx3!</div>
             <AuthButton />
         </div>
     );

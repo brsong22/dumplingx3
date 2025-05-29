@@ -36,3 +36,16 @@ export async function getMongoDb(): Promise<Db> {
     db = client.db(dbName);
     return db;
 }
+
+interface CounterDoc {
+    _id: string;
+    seq: number;
+}
+export async function getNextId(db: Db, field: string): Promise<number> {
+    const result = await db.collection<CounterDoc>("counters").findOneAndUpdate(
+        { _id: field },
+        { $inc: { seq: 1 } },
+        { returnDocument: "after", upsert: true }
+    );
+    return result.value?.seq ?? 1;
+}

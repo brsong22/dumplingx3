@@ -4,12 +4,17 @@ import { ItemFormToggle } from "@/components/forms/ItemForm/ItemFormToggle";
 import { useEffect, useState } from "react";
 import { BarcodeScanner, useLookupUpc } from "../scanner";
 import { ItemForm } from "../forms/ItemForm/ItemForm";
-import { OpenFoodFactsBarcodeResult } from "@/types/BarcodeResult";
+import { Dumplingx3Item } from "@/types/Dumplingx3Item";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBasketShopping } from "@fortawesome/free-solid-svg-icons/faBasketShopping";
+import { faWallet } from "@fortawesome/free-solid-svg-icons/faWallet";
+import { useRouter } from "next/navigation";
 
 export function AppContent({ }) {
+    const router = useRouter();
     const [isScanning, setIsScanning] = useState<boolean>(false);
     const [showForm, setShowForm] = useState<boolean>(false);
-    const [userItems, setUserItems] = useState<OpenFoodFactsBarcodeResult[]>([]);
+    const [userItems, setUserItems] = useState<Dumplingx3Item[]>([]);
 
     const { itemInfo, searchUpc, resetItemInfo } = useLookupUpc();
 
@@ -23,6 +28,12 @@ export function AppContent({ }) {
         setIsScanning(false);
         setShowForm(false);
         resetItemInfo();
+    };
+
+    const handleNavigateToItem = (id: number) => {
+        if (id) {
+            router.push(`/items/${id}`);
+        }
     };
 
     useEffect(() => {
@@ -39,8 +50,6 @@ export function AppContent({ }) {
         fetchItems();
     }, [isScanning, showForm]);
 
-    console.log(userItems);
-
     return (
         <div className="flex-1 p-4">
             {(!isScanning && !showForm) && (
@@ -49,9 +58,12 @@ export function AppContent({ }) {
                         <BarcodeScannerToggle onClick={() => setIsScanning(true)} />
                         <ItemFormToggle onClick={() => setShowForm(true)} />
                     </div>
-                    <div>
-                        {userItems.map((item, index) => (
-                            <div key={`${item.name}-list-item-${index}`}>{item.name}</div>
+                    <div className="flex-col space-y-1 mt-2">
+                        {userItems.map((item) => (
+                            <button type="button" key={`${item.id}${item.name}-list-item`} onClick={() => handleNavigateToItem(item.id)} className="flex items-center justify-between w-full h-15 px-4 py-2 bg-secondary border border-secondary rounded-md">
+                                <span><FontAwesomeIcon icon={faBasketShopping} />&nbsp;{item.name}</span>
+                                <span><FontAwesomeIcon icon={faWallet} className="ml-2" />&nbsp;{item.price}</span>
+                            </button>
                         ))}
                     </div>
                 </>

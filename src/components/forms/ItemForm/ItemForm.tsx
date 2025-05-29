@@ -2,6 +2,7 @@
 
 import { getLocalISODateTime } from "@/lib/datetimeutils";
 import { OpenFoodFactsBarcodeResult } from "@/types/BarcodeResult";
+import { Dumplingx3Item } from "@/types/Dumplingx3Item";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -13,13 +14,15 @@ export function ItemForm({
     item,
     onCancel
 }: Props) {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<Dumplingx3Item>({
+        id: item?.id,
         upc: item?.code ?? "",
         name: item?.name ?? "",
         price: "0.00",
         date: getLocalISODateTime(new Date()).split("T")[0],
         location: "",
-        image: ""
+        image: "",
+        createdBy: ""
     });
     const [price, setPrice] = useState<string>("0.00");
     const [isFail, setFail] = useState<boolean>(false);

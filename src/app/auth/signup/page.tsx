@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Header } from "@/components/page/Header";
 
 export default function SignUpPage() {
     const router = useRouter();
@@ -31,28 +32,30 @@ export default function SignUpPage() {
     }
 
     return (
-        <form onSubmit={handleSubmit} style={{ maxWidth: 320, margin: "auto" }}>
-            <h1>Sign Up</h1>
-            <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                required
-                onChange={(e) => setEmail(e.target.value)}
-                style={{ width: "100%", marginBottom: 12, padding: 8 }}
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                required
-                onChange={(e) => setPassword(e.target.value)}
-                style={{ width: "100%", marginBottom: 12, padding: 8 }}
-            />
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            <button type="submit" style={{ width: "100%", padding: 10 }}>
-                Sign Up
-            </button>
-        </form>
+        <div className="flex-col w-full h-screen bg-primary justify-center m-auto">
+            <Header />
+            <form onSubmit={handleSubmit} className="w-1/2 mx-auto p-4">
+                <input
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    required
+                    onChange={(e) => setEmail(e.target.value)}
+                    style={{ width: "100%", marginBottom: 12, padding: 8 }}
+                />
+                <input
+                    type="password"
+                    placeholder="Password"
+                    value={password}
+                    required
+                    onChange={(e) => setPassword(e.target.value)}
+                    style={{ width: "100%", marginBottom: 12, padding: 8 }}
+                />
+                {error && <p style={{ color: "red" }}>{error}</p>}
+                <button type="submit" className="bg-secondary border-2 border-accentdark font-semibold rounded-md px-2 py-1">
+                    Sign Up
+                </button>
+            </form>
+        </div>
     );
 }

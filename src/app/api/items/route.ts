@@ -1,6 +1,6 @@
 import { Session } from "next-auth";
 import { NextResponse } from "next/server";
-import { getMongoDb } from "@/lib/mongodb";
+import { getMongoDb, getNextId } from "@/lib/mongodb";
 import sessionAuth from "@/lib/sessionAuth";
 import { getItemsByUserEmail } from "@/lib/getItems";
 
@@ -36,8 +36,10 @@ export const POST = sessionAuth(async (req: Request, session: Session) => {
         const db = await getMongoDb();
         const collection = db.collection("items");
 
+        const id = await getNextId(db, "itemId");
+
         const { upc, name, price, date, location, image } = await req.json();
-        const res = await collection.insertOne({ upc, name, price, date, location, image, createdBy: session.user?.email });
+        const res = await collection.insertOne({ id, upc, name, price, date, location, image, createdBy: session.user?.email });
 
         return NextResponse.json({ success: true, insertedId: res.insertedId });
     } catch (err) {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import clientPromise from "@/lib/mongodb";
+import { getMongoDb } from "@/lib/mongodb";
 import { User } from "@/types/user";
 
 export async function POST(request: Request) {
@@ -10,8 +10,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Missing email or password" }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db(process.env.MONGO_DB);
+    const db = await getMongoDb();
 
     // Check if user already exists
     const existingUser: User | null = await db.collection<User>("users").findOne({ email });

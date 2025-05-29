@@ -9,7 +9,11 @@ export default {
     theme: {
         extend: {
             colors: {
-                dumplingprimary: "#dec3c1",
+                primary: "#dec3c1",
+                secondary: "#cddfd1",
+                primarytext: "#333333",
+                accent: "#d5c18e",
+                accentdark: "#b59795",
                 background: "var(--background)",
                 foreground: "var(--foreground)",
             },
