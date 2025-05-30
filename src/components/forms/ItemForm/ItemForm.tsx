@@ -24,8 +24,8 @@ export function ItemForm({
         name: item?.name ?? "",
         price: "0.00",
         date: getLocalISODateTime(new Date()).split("T")[0],
-        location: ""
-        // image: "",
+        location: "",
+        image: ""
     });
     const [price, setPrice] = useState<string>("0.00");
 
@@ -36,7 +36,7 @@ export function ItemForm({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         formData.price = price;
-        // formData.image = item?.image ?? "";
+        formData.image = item?.image ?? "";
 
         onSubmit(formData);
     };

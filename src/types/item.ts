@@ -10,6 +10,7 @@ export interface ItemPrice {
     id: number,
     itemId: number,
     price: number,
+    date: Date,
     createdAt: Date,
     updatedAt: Date
 }
@@ -32,7 +33,7 @@ export interface ItemForm {
     upc: string | null,
     name: string,
     location: string | null,
-    // images: ItemImage[],
+    image: string,
     price: string,
     date: string
 }

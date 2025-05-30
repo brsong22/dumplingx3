@@ -12,10 +12,10 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 
     return user;
 }
-export async function getItemsByUser(user: User, limit: number = 10) {
+export async function getItemsByUser(userId: number, limit: number = 10) {
     const userItems = await prisma.item.findMany({
         where: {
-            userId: user.id
+            userId
         },
         include: {
             images: true,
@@ -27,11 +27,11 @@ export async function getItemsByUser(user: User, limit: number = 10) {
     return userItems;
 }
 
-export async function getItemById(user: User, id: number) {
+export async function getItemById(userId: number, itemId: number) {
     const userItem = await prisma.item.findUnique({
         where: {
-            id,
-            userId: user.id
+            id: itemId,
+            userId
         },
         include: {
             images: true,
@@ -50,7 +50,7 @@ export async function getItemById(user: User, id: number) {
 }
 
 
-export async function postNewItem(itemData: ItemForm, user: User) {
+export async function postNewItem(itemData: ItemForm, userId: number) {
     const item = await prisma.item.create({
         data: {
             upc: itemData.upc,
@@ -65,10 +65,14 @@ export async function postNewItem(itemData: ItemForm, user: User) {
                 ]
             },
             images: {
-                create: []
+                create: [
+                    {
+                        url: itemData.image
+                    }
+                ]
             },
             user: {
-                connect: { id: user.id }
+                connect: { id: userId }
             }
         },
         include: {

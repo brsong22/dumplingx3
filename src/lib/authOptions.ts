@@ -34,6 +34,26 @@ export const authOptions: AuthOptions = {
             },
         }),
     ],
+    callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = parseInt(user.id, 10);
+                token.email = user?.email ?? "";
+                token.createdAt = user.createdAt;
+                token.updatedAt = user.updatedAt;
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (token) {
+                session.user.id = token.id;
+                session.user.email = token.email;
+                session.user.createdAt = token.createdAt;
+                session.user.updatedAt = token.updatedAt;
+            }
+            return session;
+        }
+    },
     pages: {
         signIn: "/auth/signin",
         error: "/auth/error",

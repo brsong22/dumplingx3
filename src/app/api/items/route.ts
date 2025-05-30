@@ -11,7 +11,7 @@ export const GET = sessionAuth(async (req: Request, session: Session) => {
 
         if (!user) return NextResponse.redirect(new URL("/auth/signin", req.url));
 
-        const items = await getItemsByUser(user);
+        const items = await getItemsByUser(user.id);
 
         return NextResponse.json({ success: true, data: items });
     } catch (err) {
@@ -28,7 +28,7 @@ export const POST = sessionAuth(async (req: Request, session: Session) => {
         if (!user) return NextResponse.redirect(new URL("/auth/signin", req.url));
 
         const formData: ItemForm = await req.json();
-        const item = await postNewItem(formData, user);
+        const item = await postNewItem(formData, user.id);
 
         return NextResponse.json({ success: true, insertedId: item.id }, { status: 201 });
     } catch (err) {
