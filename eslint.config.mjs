@@ -31,6 +31,7 @@ const eslintConfig = [
             semi: ["error", "always"],
             quotes: ["error", "double"],
         },
+        ignorePatters: ['src/generated/**/*']
     },
 ];
 
