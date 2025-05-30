@@ -1,33 +1,29 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
-import { Item } from "@/types/item";
 import { Header } from "@/components/page/Header";
+import { getServerSession } from "next-auth";
+import { getItemById } from "@/lib/prismaQueries";
+import { authOptions } from "@/lib/authOptions";
 
-export default function ItemDetailPage() {
-    const params = useParams();
-    const itemId = Array.isArray(params.id) ? parseInt(params.id[0], 10) : parseInt(params.id ?? '', 10);
+interface Props {
+    params: { id: string };
+}
+export default async function ItemDetailPage({ params }: Props) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+        redirect("/auth/signin");
+    }
+    const { id } = await params;
+    const itemId = parseInt(id, 10);
+    if (isNaN(itemId)) {
+        return notFound();
+    }
 
-    const [item, setItem] = useState<Item | null>();
+    const item = await getItemById(session.user.id, itemId);
+    if (!item) {
+        return notFound();
+    }
 
-    useEffect(() => {
-        if (!itemId) {
-            setItem(null);
-        }
-
-        const fetchItemInfo = async () => {
-            const res = await fetch(`/api/items/${itemId}`);
-            const itemInfo = await res.json();
-
-            setItem(itemInfo.data);
-        };
-
-        fetchItemInfo();
-    }, [itemId]);
-
-    console.log(item);
     return (
         <div>
             <Header />
