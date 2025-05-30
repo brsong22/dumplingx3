@@ -8,11 +8,15 @@ import { ItemForm as Form } from "@/types/item";
 
 interface Props {
     item: OpenFoodFactsBarcodeResult | null;
+    onSubmit: (data: Form) => void;
     onCancel: () => void;
+    error: string | null;
 }
 export function ItemForm({
     item,
-    onCancel
+    onSubmit,
+    onCancel,
+    error
 }: Props) {
     const [formData, setFormData] = useState<Form>({
         id: item?.id,
@@ -24,7 +28,6 @@ export function ItemForm({
         // image: "",
     });
     const [price, setPrice] = useState<string>("0.00");
-    const [isFail, setFail] = useState<boolean>(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,19 +38,7 @@ export function ItemForm({
         formData.price = price;
         // formData.image = item?.image ?? "";
 
-        const res = await fetch("/api/items", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
-        });
-
-        const result = await res.json();
-
-        if (result.success) {
-            onCancel();
-        } else {
-            setFail(true);
-        }
+        onSubmit(formData);
     };
 
     const handleCurrencyInput = (e: React.ChangeEvent<HTMLInputElement>, setValue: (v: string) => void) => {
@@ -96,7 +87,7 @@ export function ItemForm({
                 </div>
             </form>
             {
-                isFail && <p>Error occured.</p>
+                error && <p>{error}</p>
             }
         </>
     );

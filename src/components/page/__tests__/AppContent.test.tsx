@@ -1,14 +1,19 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AppContent } from "../AppContent";
 import * as useLookupHook from "@/components/scanner/useLookupUpc";
-import React from "react";
 import { mockItem } from "@/test-utils/mockItem";
 import { mockRouter } from "@/test-utils/mockRouter";
+import { withResetProvider } from "@/test-utils/resetProviderWrapper";
 
 // Mock child components
 jest.mock("@/components/scanner/BarcodeScannerToggle", () => ({
     BarcodeScannerToggle: ({ onClick }: { onClick: () => void }) => (
         <button onClick={onClick}>Scan Barcode</button>
+    ),
+}));
+jest.mock("@/components/forms/UpcForm/UpcFormToggle", () => ({
+    UpcFormToggle: ({ onClick }: { onClick: () => void }) => (
+        <button onClick={onClick}>Search UPC code</button>
     ),
 }));
 jest.mock("@/components/forms/ItemForm/ItemFormToggle", () => ({
@@ -24,6 +29,16 @@ jest.mock("@/components/scanner/BarcodeScanner", () => ({
             <button onClick={onCancel}>Cancel Scanner</button>
         </div>
     ),
+}));
+jest.mock("@/components/forms/UpcForm/UpcForm", () => ({
+    UpcForm: ({ onSubmit, onCancel, error }: { onSubmit: () => void; onCancel: () => void, error: string }) => (
+        <div>
+            <span>Search UPC Form</span>
+            <button onClick={onCancel}>Cancel</button>
+            <button onClick={onSubmit}>Search</button>
+            <p>{error}</p>
+        </div>
+    )
 }));
 jest.mock("@/components/forms/ItemForm/ItemForm", () => ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -46,6 +61,8 @@ describe("AppContent", () => {
         jest.resetAllMocks();
         global.fetch = jest.fn() as jest.Mock;
         jest.spyOn(global, "fetch").mockResolvedValue({
+            ok: true,
+            status: 200,
             json: async () => ({ data: [mockItem] }),
         } as unknown as Response);
         jest.spyOn(useLookupHook, "useLookupUpc").mockReturnValue({
@@ -58,14 +75,14 @@ describe("AppContent", () => {
 
     // unit tests
     it("renders toggle buttons initially", () => {
-        render(<AppContent />);
+        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
 
         expect(screen.getByText(/Scan Barcode/i)).toBeInTheDocument();
         expect(screen.getByText(/Enter Data/i)).toBeInTheDocument();
     });
 
     it("fetches and renders items on mount", async () => {
-        render(<AppContent />);
+        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
 
         await waitFor(() => {
             expect(screen.getByText("Yummy Dumps")).toBeInTheDocument();
@@ -75,21 +92,28 @@ describe("AppContent", () => {
     // integration tests
 
     it("shows BarcodeScanner when BarcodeScannerToggle button is clicked", () => {
-        render(<AppContent />);
+        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
 
         fireEvent.click(screen.getByText(/Scan Barcode/i));
         expect(screen.getByText(/Simulate Scan/i)).toBeInTheDocument();
     });
 
+    it("shows UpcForm when UpcSearchToggle button is clicked", () => {
+        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+
+        fireEvent.click(screen.getByText(/Search UPC code/i));
+        expect(screen.getByText(/Search UPC Form/i)).toBeInTheDocument();
+    });
+
     it("shows ItemForm when ItemFormToggle button is clicked", () => {
-        render(<AppContent />);
+        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
 
         fireEvent.click(screen.getByText(/Enter Data/i));
         expect(screen.getByText(/Form Component/i)).toBeInTheDocument();
     });
 
     it("handles scanning and shows form on success", async () => {
-        render(<AppContent />);
+        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
 
         fireEvent.click(screen.getByText(/Scan Barcode/i));
         fireEvent.click(screen.getByText(/Simulate Scan/i));
@@ -99,19 +123,46 @@ describe("AppContent", () => {
         });
     });
 
-    it("hides scanner, resets form data, and shows toggles when Cancel Scanner is clicked", () => {
-        render(<AppContent />);
+    it("hides scanner and shows toggles when Cancel Scanner is clicked", () => {
+        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+
         fireEvent.click(screen.getByText(/Scan Barcode/i));
         fireEvent.click(screen.getByText(/Cancel Scanner/i));
+
         expect(mockResetItemInfo).toHaveBeenCalled();
         expect(screen.queryByText(/Simulate Scan/i)).not.toBeInTheDocument();
     });
 
-    it("hides form, resets form data, and shows toggles when Cancel Form is clicked", () => {
-        render(<AppContent />);
+    it("hides search upc form and shows toggles when Cancel button is clicked", () => {
+        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+
+        fireEvent.click(screen.getByText(/Search UPC code/i));
+        fireEvent.click(screen.getByText(/Cancel/i));
+        expect(mockResetItemInfo).toHaveBeenCalled();
+        expect(screen.queryByText(/Search UPC Form/i)).not.toBeInTheDocument();
+    });
+
+    it("hides form and shows toggles when Cancel Form is clicked", () => {
+        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+
         fireEvent.click(screen.getByText(/Enter Data/i));
         fireEvent.click(screen.getByText(/Cancel Form/i));
         expect(mockResetItemInfo).toHaveBeenCalled();
         expect(screen.queryByText(/Form Component/i)).not.toBeInTheDocument();
+    });
+
+    it("reset provider resets component state", async () => {
+        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+
+        fireEvent.click(screen.getByText(/Enter Data/i));
+        expect(screen.getByText(/Form Component/i)).toBeInTheDocument();
+
+        fireEvent.click(screen.getByText(/Reset State/i));
+
+        await waitFor(() => {
+            expect(screen.getByText(/Scan Barcode/i)).toBeInTheDocument();
+            expect(screen.getByText(/Search UPC code/i)).toBeInTheDocument();
+            expect(screen.getByText(/Enter Data/i)).toBeInTheDocument();
+        });
     });
 });

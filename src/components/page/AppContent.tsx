@@ -1,33 +1,68 @@
 "use client";
-import { BarcodeScannerToggle } from "@/components/scanner/BarcodeScannerToggle";
-import { ItemFormToggle } from "@/components/forms/ItemForm/ItemFormToggle";
+
 import { useEffect, useState } from "react";
-import { BarcodeScanner, useLookupUpc } from "../scanner";
-import { ItemForm } from "../forms/ItemForm/ItemForm";
+import { useRouter } from "next/navigation";
+import { BarcodeScannerToggle, BarcodeScanner, useLookupUpc } from "../scanner";
+import { UpcFormToggle, UpcForm } from "@/components/forms/UpcForm";
+import { ItemFormToggle, ItemForm } from "@/components/forms/ItemForm";
+import { ItemForm as Form } from "@/types/item";
 import { Item } from "@/types/item";
+import { useReset } from "../AppContentResetProvider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBasketShopping } from "@fortawesome/free-solid-svg-icons/faBasketShopping";
-// import { faWallet } from "@fortawesome/free-solid-svg-icons/faWallet";
-import { useRouter } from "next/navigation";
 
-export function AppContent({ }) {
+export function AppContent() {
     const router = useRouter();
+    const { reset, resetFlag } = useReset();
     const [isScanning, setIsScanning] = useState<boolean>(false);
+    const [showUpcForm, setShowUpcForm] = useState<boolean>(false);
+    const [upcSearchError, setUpcSearchError] = useState<string | null>(null);
     const [showForm, setShowForm] = useState<boolean>(false);
+    const [itemFormError, setItemFormError] = useState<string | null>(null);
     const [userItems, setUserItems] = useState<Item[]>([]);
 
     const { itemInfo, searchUpc, resetItemInfo } = useLookupUpc();
 
-    async function handleDetected(code: string) {
+    const handleDetected = async (code: string) => {
         setIsScanning(false);
         await searchUpc(code);
         setShowForm(true);
     };
 
+    const handleUpcSearchSubmit = async (code: string) => {
+        const item = await searchUpc(code);
+
+        if (item) {
+            setUpcSearchError(null);
+            setShowUpcForm(false);
+            setShowForm(true);
+        } else {
+            setUpcSearchError("Unable to find item.");
+        }
+    };
+
+    const handleItemFormSubmit = async (data: Form) => {
+        const res = await fetch("/api/items", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        const result = await res.json();
+
+        if (result.success) {
+            reset();
+        } else {
+            setItemFormError("Error saving item.");
+        }
+    };
+
     const handleCancel = () => {
-        setIsScanning(false);
-        setShowForm(false);
-        resetItemInfo();
+        reset();
+        // setIsScanning(false);
+        // setShowUpcForm(false);
+        // setShowForm(false);
+        // resetItemInfo();
     };
 
     const handleNavigateToItem = (id: number) => {
@@ -50,26 +85,36 @@ export function AppContent({ }) {
         fetchItems();
     }, [isScanning, showForm]);
 
+    useEffect(() => {
+        console.log("HERE");
+        setIsScanning(false);
+        setShowUpcForm(false);
+        setUpcSearchError(null);
+        setShowForm(false);
+        resetItemInfo();
+    }, [resetFlag, resetItemInfo]);
+
     return (
         <div className="flex-1 p-4">
-            {(!isScanning && !showForm) && (
+            {(!isScanning && !showUpcForm && !showForm) && (
                 <>
                     <div className="flex flex-col gap-y-2 justify-center items-center">
                         <BarcodeScannerToggle onClick={() => setIsScanning(true)} />
+                        <UpcFormToggle onClick={() => setShowUpcForm(true)} />
                         <ItemFormToggle onClick={() => setShowForm(true)} />
                     </div>
                     <div className="flex-col space-y-1 mt-2">
                         {userItems.map((item) => (
                             <button type="button" key={`${item.id}${item.name}-list-item`} onClick={() => handleNavigateToItem(item.id)} className="flex items-center justify-between w-full h-15 px-4 py-2 bg-secondary border border-secondary rounded-md">
                                 <span><FontAwesomeIcon icon={faBasketShopping} />&nbsp;{item.name}</span>
-                                {/* <span><FontAwesomeIcon icon={faWallet} className="ml-2" />&nbsp;{item.price}</span> */}
                             </button>
                         ))}
                     </div>
                 </>
             )}
             {isScanning && <BarcodeScanner onDetected={handleDetected} onCancel={handleCancel} />}
-            {showForm && <ItemForm item={itemInfo} onCancel={handleCancel} />}
+            {showUpcForm && <UpcForm onSubmit={handleUpcSearchSubmit} onCancel={handleCancel} error={upcSearchError} />}
+            {showForm && <ItemForm item={itemInfo} onSubmit={handleItemFormSubmit} onCancel={handleCancel} error={itemFormError} />}
         </div>
     );
 }

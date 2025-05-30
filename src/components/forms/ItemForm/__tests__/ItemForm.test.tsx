@@ -3,15 +3,15 @@ import { ItemForm } from "@/components/forms/ItemForm/ItemForm";
 import { mockItem } from "@/test-utils/mockItem";
 
 describe("ItemForm", () => {
+    const onSubmitMock = jest.fn();
     const onCancelMock = jest.fn();
 
     beforeEach(() => {
         jest.resetAllMocks();
-        global.fetch = jest.fn() as jest.Mock; // this gets updated in tests so we can return appropriate success status for the test
     });
 
     it("renders with default values", () => {
-        render(<ItemForm item={mockItem} onCancel={onCancelMock} />);
+        render(<ItemForm item={mockItem} onSubmit={onSubmitMock} onCancel={onCancelMock} error={null} />);
 
         expect(screen.getByLabelText(/UPC/i)).toHaveValue(mockItem.code);
         expect(screen.getByLabelText(/Item Name/i)).toHaveValue(mockItem.name);
@@ -21,7 +21,7 @@ describe("ItemForm", () => {
     });
 
     it("handles input changes", () => {
-        render(<ItemForm item={mockItem} onCancel={onCancelMock} />);
+        render(<ItemForm item={mockItem} onSubmit={onSubmitMock} onCancel={onCancelMock} error={null} />);
 
         const nameInput = screen.getByLabelText(/Item Name/i);
         fireEvent.change(nameInput, { target: { value: "Delicious Dumps" } });
@@ -30,7 +30,7 @@ describe("ItemForm", () => {
     });
 
     it("formats price input as currency", () => {
-        render(<ItemForm item={mockItem} onCancel={onCancelMock} />);
+        render(<ItemForm item={mockItem} onSubmit={onSubmitMock} onCancel={onCancelMock} error={null} />);
 
         const priceInput = screen.getByLabelText(/Price/i);
         fireEvent.change(priceInput, { target: { value: "499" } });
@@ -39,37 +39,35 @@ describe("ItemForm", () => {
     });
 
     it("submits the form and calls onCancel", async () => {
-        jest.spyOn(global, "fetch").mockResolvedValue({
-            json: async () => ({ success: true }),
-        } as Response);
+        render(<ItemForm item={mockItem} onSubmit={onSubmitMock} onCancel={onCancelMock} error={null} />);
 
-        render(<ItemForm item={mockItem} onCancel={onCancelMock} />);
+        fireEvent.change(screen.getByLabelText(/Price/i), { target: { value: "499" } });
+        fireEvent.change(screen.getByLabelText(/Store/i), { target: { value: "Test Store" } });
 
         fireEvent.click(screen.getByText(/Submit/i));
 
         await waitFor(() => {
-            expect(fetch).toHaveBeenCalledWith("/api/items", expect.any(Object));
-            expect(onCancelMock).toHaveBeenCalled();
+            expect(onSubmitMock).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    upc: mockItem.code,
+                    name: mockItem.name,
+                    price: "4.99",
+                    location: "Test Store",
+                    date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/)
+                })
+            );
         });
     });
 
     it("handles failed submission", async () => {
-        jest.spyOn(global, "fetch").mockResolvedValue({
-            json: async () => ({ success: false }),
-        } as Response);
+        render(<ItemForm item={mockItem} onSubmit={onSubmitMock} onCancel={onCancelMock} error="Error occurred" />);
 
-        render(<ItemForm item={mockItem} onCancel={onCancelMock} />);
-
-        fireEvent.click(screen.getByText(/Submit/i));
-
-        await waitFor(() => {
-            expect(fetch).toHaveBeenCalled();
-            expect(screen.getByText(/Error occured/i)).toBeInTheDocument();
-        });
+        expect(screen.getByText(/Error occurred/)).toBeInTheDocument();
     });
 
     it("calls onCancel when cancel button is clicked", () => {
-        render(<ItemForm item={mockItem} onCancel={onCancelMock} />);
+        render(<ItemForm item={mockItem} onSubmit={onSubmitMock} onCancel={onCancelMock} error={null} />);
+
         fireEvent.click(screen.getByText(/Cancel/i));
 
         expect(onCancelMock).toHaveBeenCalled();

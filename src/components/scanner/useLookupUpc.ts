@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { OpenFoodFactsBarcodeResult } from "@/types/BarcodeResult";
 
 export function useLookupUpc() {
@@ -14,6 +14,8 @@ export function useLookupUpc() {
 
             const json = await res.json();
             setItemInfo(json.item);
+
+            return json.item;
         } catch (e) {
             console.error(e);
             setItemInfo(null);
@@ -22,9 +24,9 @@ export function useLookupUpc() {
         }
     };
 
-    const resetItemInfo = () => {
+    const resetItemInfo = useCallback(() => {
         setItemInfo(null);
-    };
+    }, []);
 
     return { itemInfo, searchUpc, resetItemInfo, loading };
 }
