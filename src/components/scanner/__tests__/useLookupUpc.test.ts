@@ -1,5 +1,6 @@
 // __tests__/useLookupUpc.test.ts
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
+import { act } from "react";
 import { useLookupUpc } from "../useLookupUpc";
 import { mockItem } from "@/test-utils/mockItem";
 
