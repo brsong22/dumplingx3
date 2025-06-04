@@ -6,7 +6,7 @@ import { getItemById } from "@/lib/prismaQueries";
 import { authOptions } from "@/lib/authOptions";
 
 interface Props {
-    params: { id: string };
+    params: Promise<{ id: string }>;
 }
 export default async function ItemDetailPage({ params }: Props) {
     const session = await getServerSession(authOptions);

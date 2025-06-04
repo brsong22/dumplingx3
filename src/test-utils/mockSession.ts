@@ -21,8 +21,10 @@ export const signedOutSession: SessionMock = {
 export const signedInSession: SessionMock = {
     data: {
         user: {
-            name: "Test User",
+            id: 404,
             email: "test@example.com",
+            createdAt: new Date("2025-01-01"),
+            updatedAt: new Date("2025-01-01")
         },
         expires: new Date(Date.now() + 3600 * 1000).toISOString(),
     },
