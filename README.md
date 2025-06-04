@@ -11,7 +11,7 @@ provide a web application that allows users to record grocery item prices and lo
 - React
 - Next.js
 - Neon Postgresql
-- Vercel hosting
+- Vercel
 
 #### Features:
 - Barcode scanner - allows users to easily find items by scanning the barcode. Uses OpenFoodFacts api to search by UPC code
