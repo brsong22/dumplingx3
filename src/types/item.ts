@@ -17,11 +17,11 @@ export interface ItemPrice {
 
 export interface Item {
     id: number,
-    upc: string | null,
+    upc?: string | null,
     name: string,
-    brand: string | null,
-    location: string | null,
-    images: ItemImage[],
+    brand?: string | null,
+    location?: Location | null,
+    images?: ItemImage[],
     userId: number,
     prices: ItemPrice[],
     createdAt: Date,
@@ -36,4 +36,11 @@ export interface ItemForm {
     image: string,
     price: string,
     date: string
+}
+
+export interface Location {
+    id: number,
+    name: string,
+    address?: string | null,
+    items?: Item[]
 }

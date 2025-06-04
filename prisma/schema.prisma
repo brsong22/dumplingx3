@@ -4,6 +4,9 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// npx prisma migrate dev --name some_migration_name
+// npx prisma generate
+
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
@@ -28,7 +31,8 @@ model Item {
   upc       String?
   name      String
   brand     String?
-  location  String?
+  location  Location? @relation(fields: [locationId], references: [id])
+  locationId Int?
   images    ItemImage[]
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
@@ -54,5 +58,12 @@ model ItemImage {
   url       String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+}
+
+model Location {
+  id        Int     @id @default(autoincrement())
+  items     Item[]
+  name      String
+  address   String?
 }
 

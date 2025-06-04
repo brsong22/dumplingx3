@@ -34,6 +34,7 @@ export async function getItemById(userId: number, itemId: number) {
             userId
         },
         include: {
+            location: true,
             images: true,
             prices: true
         }
@@ -51,11 +52,19 @@ export async function getItemById(userId: number, itemId: number) {
 
 
 export async function postNewItem(itemData: ItemForm, userId: number) {
+    let location = null;
+    if (itemData.location) {
+        location = await getLocationByName(itemData.location);
+
+        if (!location) {
+            location = await postNewLocation(itemData.location);
+        }
+    }
     const item = await prisma.item.create({
         data: {
             upc: itemData.upc,
             name: itemData.name,
-            location: itemData.location,
+            location: location ? { connect: { id: location.id } } : undefined,
             prices: {
                 create: [
                     {
@@ -82,4 +91,32 @@ export async function postNewItem(itemData: ItemForm, userId: number) {
     });
 
     return item;
+}
+
+export async function getLocationById(id: number) {
+    const location = await prisma.location.findUnique({
+        where: { id },
+        include: { items: true }
+    });
+
+    return location;
+}
+export async function getLocationByName(name: string) {
+    const location = await prisma.location.findFirst({
+        where: { name },
+        include: { items: true }
+    });
+
+    return location;
+}
+
+export async function postNewLocation(name: string, address?: string) {
+    const location = await prisma.location.create({
+        data: {
+            name,
+            address
+        }
+    });
+
+    return location;
 }

@@ -40,7 +40,7 @@ export default async function ItemDetailPage({ params }: Props) {
                     <p>Name:&nbsp;{item.name}</p>
                     <p>Latest Price:&nbsp;{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(item.prices[0].price)}</p>
                     <p>UPC:&nbsp;{item.upc}</p>
-                    <p>Store:&nbsp;{item.location}</p>
+                    <p>Store:&nbsp;{item.location?.name}</p>
                     <p>Price History:</p>
                     {
                         item.prices.map((price) => {
