@@ -1,3 +1,4 @@
+import { Container } from "@/lib/Container";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
@@ -19,7 +20,7 @@ export function BarcodeScanner({
     }, []);
 
     return (
-        <>
+        <Container>
             <button onClick={onCancel}><FontAwesomeIcon icon={faXmark} data-testid="barcodeScannerCancelIcon" /></button>
             {loading && <p>Loading...</p>}
             <BarcodeScannerComponent
@@ -31,6 +32,6 @@ export function BarcodeScanner({
                     }
                 }}
             />
-        </>
+        </Container>
     );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/page/Header";
+import { Container } from "@/lib/Container";
 
 export default function SignInPageContent() {
     const router = useRouter();
@@ -45,16 +46,15 @@ export default function SignInPageContent() {
     }
 
     return (
-        <div className="flex-col w-full h-screen bg-primary justify-center m-auto">
-            <Header />
-            <form onSubmit={handleSubmit} className="w-1/2 mx-auto p-4">
+        <Container>
+            <form onSubmit={handleSubmit}>
                 <input
                     type="email"
                     placeholder="Email"
                     value={email}
                     required
                     onChange={(e) => setEmail(e.target.value)}
-                    style={{ width: "100%", marginBottom: 12, padding: 8 }}
+                    style={{ width: "100%", marginBottom: 12, padding: 8, borderRadius: 6 }}
                 />
                 <input
                     type="password"
@@ -62,21 +62,21 @@ export default function SignInPageContent() {
                     value={password}
                     required
                     onChange={(e) => setPassword(e.target.value)}
-                    style={{ width: "100%", marginBottom: 12, padding: 8 }}
+                    style={{ width: "100%", marginBottom: 12, padding: 8, borderRadius: 6 }}
                 />
                 {error && <p style={{ color: "red" }}>{error}</p>}
                 <button
                     type="submit"
                     style={{ width: "100%", padding: 10 }}
                     disabled={loading}
-                    className="bg-secondary border-2 border-accentdark font-semibold rounded-md"
+                    className="bg-secondary border-1 border-accentsecondary font-semibold rounded-md"
                 >
                     {loading ? "Signing in..." : "Sign In"}
                 </button>
             </form>
-            <p className="w-1/2 p-4 mx-auto">
+            <p className="mt-4">
                 Don&apos;t have an account? <a href="/auth/signup" className="underline hover:text-secondary">Sign Up</a>
             </p>
-        </div>
+        </Container>
     );
 }

@@ -5,6 +5,7 @@ import { OpenFoodFactsBarcodeResult } from "@/types/BarcodeResult";
 import Image from "next/image";
 import { useState } from "react";
 import { ItemForm as Form } from "@/types/item";
+import { Container } from "@/lib/Container";
 
 interface Props {
     item: OpenFoodFactsBarcodeResult | null;
@@ -58,7 +59,7 @@ export function ItemForm({
     };
 
     return (
-        <>
+        <Container>
             {item?.image && <Image src={item?.image ?? ""} alt={`${item?.name} product image`} width="100" height="150" />}
             <form onSubmit={handleSubmit} className="flex flex-col gap-y-1">
                 <div className="flex items-center">
@@ -81,14 +82,14 @@ export function ItemForm({
                     <label htmlFor="location" className="flex-[1]">Store:</label>
                     <input id="location" name="location" value={formData?.location ?? ""} onChange={handleChange} placeholder="the Dumps store" className="flex-[2] border rounded-md px-2 py-1" />
                 </div>
-                <div className="w-full items-center mt-2">
-                    <button type="button" onClick={onCancel} className="absolute left-4 bg-white rounded-md px-2 py-1">Cancel</button>
-                    <button type="submit" className="absolute right-4 bg-green-500 rounded-md px-2 py-1">Submit</button>
+                <div className="flex w-full items-center justify-between mt-2">
+                    <button type="button" onClick={onCancel} className="bg-primary rounded-md px-2 py-1">Cancel</button>
+                    <button type="submit" className="bg-secondaryaccent rounded-md px-2 py-1">Submit</button>
                 </div>
             </form>
             {
                 error && <p>{error}</p>
             }
-        </>
+        </Container>
     );
 }

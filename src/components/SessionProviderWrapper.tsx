@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { SessionProvider } from "next-auth/react";
 
 function AuthGate({ children }: { children: ReactNode }) {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const pathName = usePathname();
 
     useEffect(() => {
-        if (status === "unauthenticated") {
+        if (pathName !== "/auth/signup" && status === "unauthenticated") {
             router.push("/auth/signin");
         }
     }, [status, router]);

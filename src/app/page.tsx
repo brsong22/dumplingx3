@@ -13,13 +13,6 @@ export default async function Home() {
     }
 
     return (
-        <div className="flex flex-col w-full h-screen">
-            <ResetProvider>
-                <Header />
-                <main className="flex-1 w-full h-full bg-primary">
-                    <AppContent />
-                </main>
-            </ResetProvider>
-        </div>
+        <AppContent />
     );
 }
