@@ -5,10 +5,12 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "prisma:generate": "prisma generate",
+    "prebuild": "npm run test:ci",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
+    "test:ci": "jest --ci",
     "test:watch": "jest --watch"
   },
   "dependencies": {
