@@ -1,3 +1,5 @@
+![Tests](https://github.com/brsong22/dumplingx3/actions/workflows/tests.yml/badge.svg)
+
 # Dumplingx3
 dumpling dumpling dumpling - it's like a personal camel camel camel for your groceries
 
