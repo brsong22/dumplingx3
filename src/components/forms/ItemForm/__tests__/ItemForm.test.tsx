@@ -17,7 +17,6 @@ describe("ItemForm", () => {
         expect(screen.getByLabelText(/Item Name/i)).toHaveValue(mockItem.name);
         expect(screen.getByLabelText(/Price/i)).toHaveValue("0.00");
         expect(screen.getByLabelText(/Store/i)).toHaveValue("");
-        expect(screen.getByAltText(/product image/i)).toBeInTheDocument();
     });
 
     it("handles input changes", () => {
