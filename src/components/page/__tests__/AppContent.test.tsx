@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { AppContent } from "../AppContent";
 import * as useLookupHook from "@/components/scanner/useLookupUpc";
 import { mockItem } from "@/test-utils/mockItem";
@@ -74,46 +74,50 @@ describe("AppContent", () => {
     });
 
     // unit tests
-    it("renders toggle buttons initially", () => {
-        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+    it("renders toggle buttons initially", async () => {
+        await act(async () => render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) }));
 
         expect(screen.getByText(/Scan Barcode/i)).toBeInTheDocument();
         expect(screen.getByText(/Enter Data/i)).toBeInTheDocument();
     });
 
     it("fetches and renders items on mount", async () => {
-        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+        await act(async () => render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) }));
 
-        await waitFor(() => {
-            expect(screen.getByText("Yummy Dumps")).toBeInTheDocument();
-        });
+        expect(screen.getByText("Yummy Dumps")).toBeInTheDocument();
     });
 
     // integration tests
 
-    it("shows BarcodeScanner when BarcodeScannerToggle button is clicked", () => {
-        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+    it("shows BarcodeScanner when BarcodeScannerToggle button is clicked", async () => {
+        await act(async () => render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) }));
 
         fireEvent.click(screen.getByText(/Scan Barcode/i));
-        expect(screen.getByText(/Simulate Scan/i)).toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByText(/Simulate Scan/i)).toBeInTheDocument();
+        });
     });
 
-    it("shows UpcForm when UpcSearchToggle button is clicked", () => {
-        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+    it("shows UpcForm when UpcSearchToggle button is clicked", async () => {
+        await act(async () => render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) }));
 
         fireEvent.click(screen.getByText(/Search UPC code/i));
-        expect(screen.getByText(/Search UPC Form/i)).toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByText(/Search UPC Form/i)).toBeInTheDocument();
+        });
     });
 
-    it("shows ItemForm when ItemFormToggle button is clicked", () => {
-        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+    it("shows ItemForm when ItemFormToggle button is clicked", async () => {
+        await act(async () => render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) }));
 
         fireEvent.click(screen.getByText(/Enter Data/i));
-        expect(screen.getByText(/Form Component/i)).toBeInTheDocument();
+        await waitFor(() => {
+            expect(screen.getByText(/Form Component/i)).toBeInTheDocument();
+        });
     });
 
     it("handles scanning and shows form on success", async () => {
-        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+        await act(async () => render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) }));
 
         fireEvent.click(screen.getByText(/Scan Barcode/i));
         fireEvent.click(screen.getByText(/Simulate Scan/i));
@@ -123,36 +127,41 @@ describe("AppContent", () => {
         });
     });
 
-    it("hides scanner and shows toggles when Cancel Scanner is clicked", () => {
-        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+    it("hides scanner and shows toggles when Cancel Scanner is clicked", async () => {
+        await act(async () => render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) }));
 
         fireEvent.click(screen.getByText(/Scan Barcode/i));
         fireEvent.click(screen.getByText(/Cancel Scanner/i));
-
-        expect(mockResetItemInfo).toHaveBeenCalled();
-        expect(screen.queryByText(/Simulate Scan/i)).not.toBeInTheDocument();
+        await waitFor(() => {
+            expect(mockResetItemInfo).toHaveBeenCalled();
+            expect(screen.queryByText(/Simulate Scan/i)).not.toBeInTheDocument();
+        });
     });
 
-    it("hides search upc form and shows toggles when Cancel button is clicked", () => {
-        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+    it("hides search upc form and shows toggles when Cancel button is clicked", async () => {
+        await act(async () => render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) }));
 
         fireEvent.click(screen.getByText(/Search UPC code/i));
         fireEvent.click(screen.getByText(/Cancel/i));
-        expect(mockResetItemInfo).toHaveBeenCalled();
-        expect(screen.queryByText(/Search UPC Form/i)).not.toBeInTheDocument();
+        await waitFor(() => {
+            expect(mockResetItemInfo).toHaveBeenCalled();
+            expect(screen.queryByText(/Search UPC Form/i)).not.toBeInTheDocument();
+        });
     });
 
-    it("hides form and shows toggles when Cancel Form is clicked", () => {
-        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+    it("hides form and shows toggles when Cancel Form is clicked", async () => {
+        await act(async () => render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) }));
 
         fireEvent.click(screen.getByText(/Enter Data/i));
         fireEvent.click(screen.getByText(/Cancel Form/i));
-        expect(mockResetItemInfo).toHaveBeenCalled();
-        expect(screen.queryByText(/Form Component/i)).not.toBeInTheDocument();
+        await waitFor(() => {
+            expect(mockResetItemInfo).toHaveBeenCalled();
+            expect(screen.queryByText(/Form Component/i)).not.toBeInTheDocument();
+        });
     });
 
     it("reset provider resets component state", async () => {
-        render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) });
+        await act(async () => render(<AppContent />, { wrapper: ({ children }) => withResetProvider(children) }));
 
         fireEvent.click(screen.getByText(/Enter Data/i));
         expect(screen.getByText(/Form Component/i)).toBeInTheDocument();

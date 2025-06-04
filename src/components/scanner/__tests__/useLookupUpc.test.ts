@@ -8,6 +8,7 @@ global.fetch = jest.fn();
 describe("useLookupUpc", () => {
     beforeEach(() => {
         jest.resetAllMocks();
+        jest.spyOn(console, 'error').mockImplementation(() => { });
     });
 
     it("should initialize with null result and not loading", () => {
