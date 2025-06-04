@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "jest",
-    "test:ci": "jest --ci",
+    "test:ci": "NODE_ENV=dev jest --ci",
     "test:watch": "jest --watch"
   },
   "dependencies": {
