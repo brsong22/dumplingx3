@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Header } from "@/components/page/Header";
 import { Container } from "@/lib/Container";
 
 export default function SignInPageContent() {

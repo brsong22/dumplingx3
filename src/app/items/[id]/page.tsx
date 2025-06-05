@@ -1,6 +1,5 @@
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
-import { Header } from "@/components/page/Header";
 import { getServerSession } from "next-auth";
 import { getItemById } from "@/lib/prismaQueries";
 import { authOptions } from "@/lib/authOptions";

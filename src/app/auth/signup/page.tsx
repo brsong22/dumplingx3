@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Header } from "@/components/page/Header";
 import { Container } from "@/lib/Container";
 
 export default function SignUpPage() {
