@@ -4,6 +4,7 @@ import { Header } from "@/components/page/Header";
 import { getServerSession } from "next-auth";
 import { getItemById } from "@/lib/prismaQueries";
 import { authOptions } from "@/lib/authOptions";
+import { Container } from "@/lib/Container";
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -25,9 +26,7 @@ export default async function ItemDetailPage({ params }: Props) {
     }
 
     return (
-        <div>
-            <Header />
-            <h2 className="font-bold text-2xl">{item?.name}</h2>
+        <Container>
             {
                 item &&
                 <>
@@ -37,11 +36,11 @@ export default async function ItemDetailPage({ params }: Props) {
                             return <Image src={image.url} alt={`${item.name}-product-image-${index}`} width="80" height="100" />
                         })
                     }
-                    <p>Name:&nbsp;{item.name}</p>
-                    <p>Latest Price:&nbsp;{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(item.prices[0].price)}</p>
-                    <p>UPC:&nbsp;{item.upc}</p>
-                    <p>Store:&nbsp;{item.location?.name}</p>
-                    <p>Price History:</p>
+                    <strong>Name:</strong>&nbsp;{item.name}
+                    <strong>Latest Price:</strong>&nbsp;{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(item.prices[0].price)}
+                    <strong>UPC:</strong>&nbsp;{item.upc}
+                    <strong>Store:</strong>&nbsp;{item.location?.name ?? "--"}
+                    <strong>Price History:</strong>
                     {
                         item.prices.map((price) => {
                             return <p>{new Date(price.date).toISOString().split("T")[0]}: {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(price.price)}</p>
@@ -50,6 +49,6 @@ export default async function ItemDetailPage({ params }: Props) {
                 </>
             }
 
-        </div>
+        </Container>
     );
 }
