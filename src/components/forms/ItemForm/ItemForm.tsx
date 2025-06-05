@@ -26,7 +26,7 @@ export function ItemForm({
         price: "0.00",
         date: getLocalISODateTime(new Date()).split("T")[0],
         location: "",
-        image: ""
+        image: null
     });
     const [price, setPrice] = useState<string>("0.00");
 

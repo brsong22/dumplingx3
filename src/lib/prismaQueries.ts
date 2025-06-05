@@ -73,13 +73,13 @@ export async function postNewItem(itemData: ItemForm, userId: number) {
                     }
                 ]
             },
-            images: {
+            images: itemData.image ? {
                 create: [
                     {
                         url: itemData.image
                     }
                 ]
-            },
+            } : undefined,
             user: {
                 connect: { id: userId }
             }

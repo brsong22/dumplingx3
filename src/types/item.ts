@@ -33,7 +33,7 @@ export interface ItemForm {
     upc: string | null,
     name: string,
     location: string | null,
-    image: string,
+    image: string | null,
     price: string,
     date: string
 }
