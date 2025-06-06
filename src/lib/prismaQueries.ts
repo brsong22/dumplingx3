@@ -3,6 +3,16 @@ import { prisma } from "./prisma";
 import { ItemForm } from "@/types/item";
 import { Decimal } from "@prisma/client/runtime/library";
 
+export async function getUserById(id: number): Promise<User | null> {
+    const user = await prisma.user.findUnique({
+        where: {
+            id
+        }
+    });
+
+    return user;
+}
+
 export async function getUserByEmail(email: string): Promise<User | null> {
     const user = await prisma.user.findUnique({
         where: {
@@ -12,6 +22,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 
     return user;
 }
+
 export async function getItemsByUser(userId: number, limit: number = 10) {
     const userItems = await prisma.item.findMany({
         where: {
@@ -50,6 +61,32 @@ export async function getItemById(userId: number, itemId: number) {
     return item;
 }
 
+export async function getItemsByNameSearch(nameQuery: string, user: User) {
+    const matches = await prisma.item.findMany({
+        where: {
+            user,
+            name: {
+                contains: nameQuery,
+                mode: "insensitive"
+            }
+        },
+        include: {
+            images: true,
+            prices: true,
+            location: true
+        }
+    });
+
+    const withPricesAsNumber = matches.map((item) => ({
+        ...item,
+        prices: item.prices.map((price) => ({
+            ...price,
+            price: price.price.toNumber()
+        }))
+    }));
+
+    return withPricesAsNumber;
+}
 
 export async function postNewItem(itemData: ItemForm, userId: number) {
     let location = null;
