@@ -39,15 +39,18 @@ export async function getItemsByUser(userId: number, limit: number = 10) {
 }
 
 export async function getItemById(userId: number, itemId: number) {
-    const userItem = await prisma.item.findUnique({
+    const userItem = await prisma.item.findFirst({
         where: {
             id: itemId,
             userId
         },
         include: {
-            location: true,
             images: true,
-            prices: true
+            prices: {
+                include: {
+                    location: true
+                }
+            }
         }
     });
 
@@ -72,8 +75,11 @@ export async function getItemsByNameSearch(nameQuery: string, user: User) {
         },
         include: {
             images: true,
-            prices: true,
-            location: true
+            prices: {
+                include: {
+                    location: true
+                }
+            }
         }
     });
 
@@ -89,31 +95,30 @@ export async function getItemsByNameSearch(nameQuery: string, user: User) {
 }
 
 export async function postNewItem(itemData: ItemForm, userId: number) {
-    let location = null;
-    if (itemData.location) {
-        location = await getLocationByName(itemData.location);
-
-        if (!location) {
-            location = await postNewLocation(itemData.location);
-        }
-    }
     const item = await prisma.item.create({
         data: {
             upc: itemData.upc,
             name: itemData.name,
-            location: location ? { connect: { id: location.id } } : undefined,
             prices: {
-                create: [
-                    {
-                        price: new Decimal(Number(itemData.price)),
-                        date: new Date(itemData.date)
-                    }
-                ]
+                create: {
+                    location: itemData.locationId
+                        ? { connect: { id: itemData.locationId } }
+                        : {
+                            create: {
+                                name: itemData.location,
+                                user: { connect: { id: userId } }
+                            }
+                        },
+                    price: new Decimal(Number(itemData.price)),
+                    date: new Date(itemData.date),
+                    user: { connect: { id: userId } }
+                }
             },
             images: itemData.image ? {
                 create: [
                     {
-                        url: itemData.image
+                        url: itemData.image,
+                        user: { connect: { id: userId } }
                     }
                 ]
             } : undefined,
@@ -122,7 +127,11 @@ export async function postNewItem(itemData: ItemForm, userId: number) {
             }
         },
         include: {
-            prices: true,
+            prices: {
+                include: {
+                    location: true
+                }
+            },
             images: true
         }
     });
@@ -130,29 +139,104 @@ export async function postNewItem(itemData: ItemForm, userId: number) {
     return item;
 }
 
-export async function getLocationById(id: number) {
-    const location = await prisma.location.findUnique({
-        where: { id },
-        include: { items: true }
-    });
-
-    return location;
-}
-export async function getLocationByName(name: string) {
-    const location = await prisma.location.findFirst({
-        where: { name },
-        include: { items: true }
-    });
-
-    return location;
-}
-
-export async function postNewLocation(name: string, address?: string) {
-    const location = await prisma.location.create({
-        data: {
-            name,
-            address
+export async function getPriceRecordsByItemId(itemId: number, user: User) {
+    const priceRecords = await prisma.priceRecord.findMany({
+        where: {
+            itemId,
+            user
+        },
+        include: {
+            item: true,
+            location: true
+        },
+        orderBy: {
+            date: "asc"
         }
+    });
+
+    return priceRecords;
+}
+
+export async function getLocationsByNameSearch(nameQuery: string, user: User) {
+    const matches = await prisma.location.findMany({
+        where: {
+            user,
+            name: {
+                contains: nameQuery,
+                mode: "insensitive"
+            }
+        }
+    });
+
+    return matches;
+}
+
+export async function getPriceRecordsByLocationId(locationId: number, user: User) {
+    const priceRecords = await prisma.priceRecord.findMany({
+        where: {
+            locationId,
+            user
+        },
+        include: {
+            item: true,
+            location: true
+        },
+        orderBy: {
+            date: "asc"
+        }
+    });
+
+    return priceRecords;
+}
+
+export async function postPriceRecord(formData: ItemForm, userId: number) {
+    if (!formData.id) return null;
+    const priceRecord = await prisma.priceRecord.create({
+        data: {
+            item: { connect: { id: formData.id } },
+            location: formData.locationId
+                ? { connect: { id: formData.locationId } }
+                : { create: { name: formData.location, user: { connect: { id: userId } } } },
+            price: formData.price,
+            date: new Date(formData.date),
+            user: { connect: { id: userId } }
+        },
+        include: {
+            item: {
+                include: {
+                    prices: true,
+                    images: true
+                }
+            }
+        }
+    });
+
+    return priceRecord.item;
+}
+
+export async function getLocationsByItemId(itemId: number, user: User) {
+    const itemPriceRecords = await prisma.priceRecord.findMany({
+        where: {
+            itemId,
+            user
+        },
+        distinct: ["locationId"],
+        include: {
+            location: true
+        }
+    });
+
+    const locations = itemPriceRecords.map((record) => (record.location));
+
+    return locations;
+}
+
+export async function getLocationById(id: number, user: User) {
+    const location = await prisma.location.findUnique({
+        where: {
+            id,
+            user
+        },
     });
 
     return location;

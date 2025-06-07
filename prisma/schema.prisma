@@ -24,6 +24,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
   items     Item[]
+  itemImages ItemImage[]
+  locations Location[]
+  priceRecords PriceRecord[]
 }
 
 model Item {
@@ -31,24 +34,12 @@ model Item {
   upc       String?
   name      String
   brand     String?
-  location  Location? @relation(fields: [locationId], references: [id])
-  locationId Int?
   images    ItemImage[]
+  prices    PriceRecord[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
   userId    Int
-  prices    ItemPrice[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-}
-
-model ItemPrice {
-  id        Int      @id @default(autoincrement())
-  item      Item     @relation(fields: [itemId], references: [id])
-  itemId    Int
-  price     Decimal  @db.Decimal(10, 2)
-  date      DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
 }
 
 model ItemImage {
@@ -58,12 +49,35 @@ model ItemImage {
   url       String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
 }
 
 model Location {
   id        Int     @id @default(autoincrement())
-  items     Item[]
+  prices    PriceRecord[]
   name      String
   address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+}
+
+model PriceRecord {
+  id         Int      @id @default(autoincrement())
+  item       Item     @relation(fields: [itemId], references: [id])
+  itemId     Int
+  location   Location @relation(fields: [locationId], references: [id])
+  locationId Int
+  price      Decimal  @db.Decimal(10, 2)
+  note       String?
+  date       DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+
+  @@unique([itemId, locationId, date])
 }
 

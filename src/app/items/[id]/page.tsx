@@ -38,11 +38,14 @@ export default async function ItemDetailPage({ params }: Props) {
                     <strong>Name:</strong>&nbsp;{item.name}
                     <strong>Latest Price:</strong>&nbsp;{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(item.prices[0].price)}
                     <strong>UPC:</strong>&nbsp;{item.upc}
-                    <strong>Store:</strong>&nbsp;{item.location?.name ?? "--"}
                     <strong>Price History:</strong>
                     {
                         item.prices.map((price) => {
-                            return <p>{new Date(price.date).toISOString().split("T")[0]}: {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(price.price)}</p>
+                            return <p>
+                                {new Date(price.date).toISOString().split("T")[0]}:
+                                &nbsp;{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(price.price)}
+                                &nbsp;@ {price.location.name}
+                            </p>
                         })
                     }
                 </>

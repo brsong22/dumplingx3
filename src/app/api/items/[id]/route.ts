@@ -14,7 +14,7 @@ export const GET = sessionAuth(async (req: Request, session: Session, params: { 
 
         if (!user) return NextResponse.redirect(new URL("/auth/signin", req.url));
 
-        const item: Item | null = await getItemById(user.id, parseInt(itemId, 10));
+        const item = await getItemById(user.id, parseInt(itemId, 10));
 
         if (!item) return NextResponse.json({ success: false, message: "Item not found." }, { status: 404 });
 

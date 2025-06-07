@@ -1,7 +1,7 @@
 import { Session } from "next-auth";
 import { NextResponse } from "next/server";
 import sessionAuth from "@/lib/sessionAuth";
-import { getUserByEmail, getItemsByUser, postNewItem } from "@/lib/prismaQueries";
+import { getUserByEmail, getItemsByUser, postNewItem, postPriceRecord } from "@/lib/prismaQueries";
 import { ItemForm } from "@/types/item";
 
 export const GET = sessionAuth(async (req: Request, session: Session) => {
@@ -28,7 +28,17 @@ export const POST = sessionAuth(async (req: Request, session: Session) => {
         if (!user) return NextResponse.redirect(new URL("/auth/signin", req.url));
 
         const formData: ItemForm = await req.json();
-        const item = await postNewItem(formData, user.id);
+
+        let item = null;
+        if (formData.id) {
+            item = await postPriceRecord(formData, user.id);
+        } else {
+            item = await postNewItem(formData, user.id);
+        }
+
+        if (!item) {
+            return NextResponse.json({ success: false, message: "could not create item record." }, { status: 500 });
+        }
 
         return NextResponse.json({ success: true, insertedId: item.id }, { status: 201 });
     } catch (err) {

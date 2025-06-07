@@ -4,7 +4,7 @@ import { getLocalISODateTime } from "@/lib/datetimeutils";
 import { OpenFoodFactsBarcodeResult } from "@/types/BarcodeResult";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ItemForm as Form, Item } from "@/types/item";
+import { ItemForm as Form, Item, Location } from "@/types/item";
 import { Container } from "@/lib/Container";
 import { debounce } from "@/lib/debounce";
 
@@ -15,12 +15,20 @@ interface Props {
     error: string | null;
 }
 
-async function searchSuggestions(query: string): Promise<Item[]> {
+async function itemByNameSuggestions(query: string): Promise<Item[]> {
     const params = new URLSearchParams({ q: query });
     const res = await fetch(`/api/items/search?${params.toString()}`);
     const { data: nameMatches } = await res.json();
 
     return nameMatches;
+}
+
+async function locationByNameSuggestions(query: string): Promise<Location[]> {
+    const params = new URLSearchParams({ q: query });
+    const res = await fetch(`/api/locations/search?${params.toString()}`);
+    const { data: locationMatches } = await res.json();
+
+    return locationMatches;
 }
 
 export function ItemForm({
@@ -30,17 +38,20 @@ export function ItemForm({
     error
 }: Props) {
     const [formData, setFormData] = useState<Form>({
-        id: item?.id,
+        id: item?.id ?? null,
         upc: item?.code ?? "",
         name: item?.name ?? "",
         price: "0.00",
         date: getLocalISODateTime(new Date()).split("T")[0],
         location: "",
+        locationId: null,
         image: null
     });
     const [price, setPrice] = useState<string>("0.00");
-    const [suggestions, setSuggestions] = useState<Item[]>([]);
+    const [nameMatches, setItemNameMatches] = useState<Item[]>([]);
     const [nameIsFocused, setNameIsFocused] = useState<boolean>(false);
+    const [locationMatches, setLocationMatches] = useState<Location[]>([]);
+    const [locationIsFocused, setLocationIsFocused] = useState<boolean>(false);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -58,10 +69,33 @@ export function ItemForm({
         const searchName = e.target.value;
         setFormData({
             ...formData,
+            id: null,
             name: searchName
         });
-        debouncedSuggestions(searchName);
+        debouncedItemNameMatches(searchName);
+    };
+
+    const handleNameSuggestion = async (e: React.MouseEvent<HTMLLIElement>, item: Item) => {
+        setFormData({
+            ...formData,
+            id: item.id,
+            name: item.name,
+            upc: item.upc ?? null,
+            price: "0.00",
+            image: null
+        });
+        setItemNameMatches([]);
     }
+
+    const handleLocationInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const searchName = e.target.value;
+        setFormData({
+            ...formData,
+            locationId: null,
+            location: searchName
+        });
+        debouncedLocationMatches(searchName);
+    };
 
     const handleCurrencyInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const digitsOnly = e.target.value.replace(/\D/g, "");
@@ -79,14 +113,30 @@ export function ItemForm({
         setPrice(`${formattedDollars}.${cents}`);
     };
 
-    const debouncedSuggestions = useCallback(debounce(async (query: string) => {
-        const suggestions = await searchSuggestions(query);
-        setSuggestions(suggestions);
+    const debouncedItemNameMatches = useCallback(debounce(async (query: string) => {
+        const nameMatches = await itemByNameSuggestions(query);
+        setItemNameMatches(nameMatches);
     }, 100), []);
 
+    const debouncedLocationMatches = useCallback(debounce(async (query: string) => {
+        const locationMatches = await locationByNameSuggestions(query);
+        setLocationMatches(locationMatches ?? []);
+    }, 100), []);
+
+    const filteredLocations = useMemo(() => {
+        if (!formData.location) return locationMatches;
+        return locationMatches.filter((loc) =>
+            loc.name.toLowerCase().includes(formData.location.toLowerCase())
+        );
+    }, [formData.location, locationMatches]);
+
     useEffect(() => {
-        debouncedSuggestions("");
-    }, [])
+        debouncedItemNameMatches("");
+    }, []);
+
+    useEffect(() => {
+        debouncedLocationMatches("");
+    }, []);
 
     return (
         <Container>
@@ -95,30 +145,19 @@ export function ItemForm({
                 <div className="flex items-center">
                     <label htmlFor="upc" className="flex-1">UPC:</label>
                     <div className="flex-[2] relative">
-                        <input id="upc" name="upc" value={formData?.upc ?? ""} onChange={handleChange} placeholder="01234567891011" className="w-full border rounded-md px-2 py-1" />
+                        <input id="upc" name="upc" value={formData?.upc ?? ""} disabled={formData.id ? true : false} onChange={handleChange} placeholder="01234567891011" className="w-full border rounded-md px-2 py-1" />
                     </div>
                 </div>
                 <div className="flex items-center">
-                    <label htmlFor="name" className="flex-1">Name:</label>
+                    <label htmlFor="name" className="flex-1">Name*:</label>
                     <div className="flex-[2] relative">
-                        <input id="name" name="name" value={formData.name} onChange={handleNameInput} onFocus={() => setNameIsFocused(true)} onBlur={() => setNameIsFocused(false)} placeholder="Tasty Dumps" autoComplete="off" className="w-full border rounded-md px-2 py-1" />
-                        {(nameIsFocused && suggestions.length > 0) && (
+                        <input id="name" name="name" value={formData.name} required={true} onChange={handleNameInput} onFocus={() => setNameIsFocused(true)} onBlur={() => setNameIsFocused(false)} placeholder="Tasty Dumps" autoComplete="off" className="w-full border rounded-md px-2 py-1" />
+                        {(nameIsFocused && nameMatches.length > 0) && (
                             <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
-                                {suggestions.map((item) => (
+                                {nameMatches.map((item) => (
                                     <li
                                         key={item.id}
-                                        onMouseDown={() => {
-                                            setFormData({
-                                                ...formData,
-                                                id: item.id,
-                                                name: item.name,
-                                                upc: item.upc ?? null,
-                                                price: "0.00",
-                                                location: item.location?.name ?? "",
-                                                image: null
-                                            });
-                                            setSuggestions([]);
-                                        }}
+                                        onMouseDown={(e) => handleNameSuggestion(e, item)}
                                         className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
                                     >
                                         {item.name}
@@ -135,9 +174,29 @@ export function ItemForm({
                     </div>
                 </div>
                 <div className="flex items-center">
-                    <label htmlFor="location" className="flex-1">Store:</label>
+                    <label htmlFor="location" className="flex-1">Store*:</label>
                     <div className="flex-[2] relative">
-                        <input id="location" name="location" value={formData?.location ?? ""} onChange={handleChange} placeholder="the Dumps store" className="w-full border rounded-md px-2 py-1" />
+                        <input id="location" name="location" value={formData?.location ?? ""} required={true} onChange={handleLocationInput} onFocus={() => setLocationIsFocused(true)} onBlur={() => setLocationIsFocused(false)} placeholder="the Dumps store" autoComplete="off" className="w-full border rounded-md px-2 py-1" />
+                        {(locationIsFocused && filteredLocations.length > 0) && (
+                            <ul className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                                {filteredLocations.map((location) => (
+                                    <li
+                                        key={location.id}
+                                        onMouseDown={() => {
+                                            setFormData({
+                                                ...formData,
+                                                locationId: location.id,
+                                                location: location.name
+                                            });
+                                            setLocationMatches([]);
+                                        }}
+                                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                                    >
+                                        {location.name}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 </div>
                 <div className="flex items-center">
